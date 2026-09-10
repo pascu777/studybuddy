@@ -15,11 +15,12 @@ import {
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { Avatar, Button, Card, ListRow, Screen, Text } from '@/components';
+import { adminRoutes } from '@/features/admin/routes';
 import { useSignOut } from '@/features/auth/hooks';
 import { useSession } from '@/features/auth/session-provider';
 import { useUnreadNotifications } from '@/features/notifications/hooks';
 import { useProfile } from '@/features/profile/hooks';
-import { demoSwitchRole } from '@/lib/demo/client';
+import { demoActAs, DEMO_ADMIN_ID, demoSwitchRole } from '@/lib/demo/client';
 import { DEMO_MODE } from '@/lib/env';
 import { queryClient } from '@/lib/query-client';
 import { useTheme } from '@/theme/theme-provider';
@@ -86,6 +87,17 @@ export default function AccountScreen() {
         </Pressable>
       </Card>
 
+      {full?.profile.is_admin ? (
+        <Card padding="sm" style={styles.list}>
+          <ListRow
+            icon={icon(ShieldCheck)}
+            title="Pannello amministrazione"
+            subtitle="Verifiche titoli, utenti e metriche"
+            onPress={() => router.push(adminRoutes.root)}
+          />
+        </Card>
+      ) : null}
+
       <Card padding="sm" style={styles.list}>
         <ListRow
           icon={icon(UserRound)}
@@ -151,6 +163,15 @@ export default function AccountScreen() {
               demoSwitchRole();
               queryClient.clear();
               router.replace('/(app)/home');
+            }}
+          />
+          <Button
+            label="Apri pannello admin"
+            variant="secondary"
+            onPress={() => {
+              demoActAs(DEMO_ADMIN_ID);
+              queryClient.clear();
+              router.replace(adminRoutes.root);
             }}
           />
         </Card>

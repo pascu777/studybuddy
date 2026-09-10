@@ -246,6 +246,48 @@ export interface ProfileRow extends Timestamps {
   location_geog: unknown | null;
   school_context: SchoolContext | null;
   onboarding_completed_at: string | null;
+  /** F10 — impostabile solo lato service role (vedi 0008_admin.sql). */
+  is_admin: boolean;
+}
+
+// ---- F10 Pannello admin ----
+export interface AdminOverviewRow {
+  users_total: number;
+  students_total: number;
+  tutors_total: number;
+  tutors_verified: number;
+  tutors_pending: number;
+  credentials_pending: number;
+  bookings_total: number;
+  bookings_upcoming: number;
+  gmv_cents: number;
+  commission_cents: number;
+  emergencies_open: number;
+  groups_total: number;
+}
+export interface AdminPendingCredentialRow {
+  id: string;
+  tutor_id: string;
+  tutor_name: string;
+  tutor_avatar_url: string | null;
+  tutor_verified: boolean;
+  title: string;
+  institution: string;
+  year: number | null;
+  document_url: string | null;
+  requested_at: string | null;
+}
+export interface AdminUserRow {
+  id: string;
+  first_name: string;
+  last_name: string;
+  avatar_url: string | null;
+  role: UserRole | null;
+  is_admin: boolean;
+  verified: boolean;
+  location_label: string | null;
+  onboarding_completed: boolean;
+  created_at: string;
 }
 
 export interface TutorProfileRow extends Timestamps {

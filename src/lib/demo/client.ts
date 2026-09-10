@@ -3,7 +3,13 @@
  * usato dagli hook, su un dataset in memoria. Le scritture aggiornano lo stato
  * (perso al reload). Nessuna rete.
  */
-import { buildDemoStore, DEMO_STUDENT_ID, DEMO_TUTOR_ID, type DemoStore } from './dataset';
+import {
+  buildDemoStore,
+  DEMO_ADMIN_ID,
+  DEMO_STUDENT_ID,
+  DEMO_TUTOR_ID,
+  type DemoStore,
+} from './dataset';
 
 const store: DemoStore = buildDemoStore();
 
@@ -212,6 +218,12 @@ export function demoSwitchRole() {
   authListeners.forEach((cb) => cb('SIGNED_IN', currentSession()));
 }
 
+/** Passa a un utente demo specifico (studente / tutor / admin) e rinfresca la sessione. */
+export function demoActAs(id: string) {
+  actingAs = id;
+  authListeners.forEach((cb) => cb('SIGNED_IN', currentSession()));
+}
+
 const auth = {
   async getSession() {
     return { data: { session: currentSession() }, error: null };
@@ -283,4 +295,4 @@ export const demoClient: any = {
   removeChannel() {},
 };
 
-export { DEMO_STUDENT_ID, DEMO_TUTOR_ID };
+export { DEMO_ADMIN_ID, DEMO_STUDENT_ID, DEMO_TUTOR_ID };

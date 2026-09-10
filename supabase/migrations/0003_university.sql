@@ -150,6 +150,8 @@ $$;
 grant execute on function public.search_tutors_by_course to authenticated;
 
 -- Estende la scheda pubblica del tutor con gli esami coperti e la tariffa oraria.
+-- Il set di colonne di ritorno cambia rispetto a 0002: va ricreata da zero.
+drop function if exists public.get_tutor(uuid);
 create or replace function public.get_tutor(p_id uuid)
 returns table (
   id uuid, first_name text, last_name text, avatar_url text, location_label text,

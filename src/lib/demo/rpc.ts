@@ -476,6 +476,118 @@ export function demoRpc(name: string, p: any, s: DemoStore, uid: string): any {
         });
     }
 
+    /* --------------------------- F10 — Pannello admin --------------------------- */
+    case 'admin_overview': {
+      const paid = s.bookings.filter((b) => ['confirmed', 'completed'].includes(b.status));
+      return [
+        {
+          users_total: s.profiles.length,
+          students_total: s.profiles.filter((x) => x.role === 'student').length,
+          tutors_total: s.profiles.filter((x) => x.role === 'tutor').length,
+          tutors_verified: s.tutor_profiles.filter((x) => x.verified).length,
+          tutors_pending: s.tutor_profiles.filter((x) => !x.verified).length,
+          credentials_pending: s.tutor_credentials.filter((c) => c.verification_status === 'requested').length,
+          bookings_total: s.bookings.length,
+          bookings_upcoming: s.bookings.filter(
+            (b) => b.status === 'confirmed' && new Date(b.ends_at).getTime() > Date.now(),
+          ).length,
+          gmv_cents: paid.reduce((a, b) => a + (b.price_cents ?? 0), 0),
+          commission_cents: paid.reduce((a, b) => a + (b.commission_cents ?? 0), 0),
+          emergencies_open: s.emergency_requests.filter((e) => e.status === 'open').length,
+          groups_total: s.study_groups.length,
+        },
+      ];
+    }
+
+    case 'admin_pending_credentials': {
+      return s.tutor_credentials
+        .filter((c) => c.verification_status === 'requested')
+        .map((c) => {
+          const pr = prof(c.tutor_id);
+          return {
+            id: c.id,
+            tutor_id: c.tutor_id,
+            tutor_name: pr ? `${pr.first_name} ${pr.last_name}`.trim() : '',
+            tutor_avatar_url: pr?.avatar_url ?? null,
+            tutor_verified: tprof(c.tutor_id)?.verified ?? false,
+            title: c.title,
+            institution: c.institution,
+            year: c.year ?? null,
+            document_url: c.document_url ?? null,
+            requested_at: c.requested_at ?? c.created_at,
+          };
+        })
+        .sort((a, b) => String(a.requested_at).localeCompare(String(b.requested_at)));
+    }
+
+    case 'admin_review_credential': {
+      const c = s.tutor_credentials.find((x) => x.id === p.p_id);
+      if (!c) return null;
+      c.verification_status = p.p_approve ? 'verified' : 'rejected';
+      c.reviewed_at = new Date().toISOString();
+      c.reviewer_note = p.p_note ?? '';
+      if (p.p_approve) {
+        const tp = tprof(c.tutor_id);
+        if (tp) tp.verified = true;
+      }
+      s.notifications.push({
+        id: `n-${Date.now()}`,
+        user_id: c.tutor_id,
+        kind: p.p_approve ? 'credential_verified' : 'credential_rejected',
+        title: p.p_approve ? 'Titolo verificato' : 'Titolo non verificato',
+        body: p.p_approve
+          ? `"${c.title}" è stato verificato.`
+          : `La verifica di "${c.title}" non è andata a buon fine.`,
+        link: '/(app)/profilo',
+        read_at: null,
+        created_at: new Date().toISOString(),
+      });
+      return null;
+    }
+
+    case 'admin_set_tutor_verified': {
+      const tp = tprof(p.p_tutor_id);
+      if (tp) tp.verified = !!p.p_verified;
+      s.notifications.push({
+        id: `n-${Date.now()}`,
+        user_id: p.p_tutor_id,
+        kind: p.p_verified ? 'tutor_verified' : 'tutor_unverified',
+        title: p.p_verified ? 'Profilo verificato' : 'Verifica revocata',
+        body: p.p_verified
+          ? 'Un amministratore ha verificato il tuo profilo.'
+          : 'Lo stato "verificato" del tuo profilo è stato revocato.',
+        link: '/(app)/profilo',
+        read_at: null,
+        created_at: new Date().toISOString(),
+      });
+      return null;
+    }
+
+    case 'admin_list_users': {
+      const q = String(p.p_query ?? '').toLowerCase();
+      const role = p.p_role ?? 'all';
+      return s.profiles
+        .filter((pr) => role === 'all' || pr.role === role)
+        .filter((pr) => {
+          if (!q) return true;
+          const name = `${pr.first_name} ${pr.last_name}`.toLowerCase();
+          return name.includes(q) || String(pr.location_label ?? '').toLowerCase().includes(q);
+        })
+        .map((pr) => ({
+          id: pr.id,
+          first_name: pr.first_name,
+          last_name: pr.last_name,
+          avatar_url: pr.avatar_url ?? null,
+          role: pr.role,
+          is_admin: !!pr.is_admin,
+          verified: tprof(pr.id)?.verified ?? false,
+          location_label: pr.location_label ?? null,
+          onboarding_completed: !!pr.onboarding_completed_at,
+          created_at: pr.created_at,
+        }))
+        .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+    }
+
     default:
       return [];
   }

@@ -15,6 +15,7 @@ const day = (d: number, h: number) => {
 
 export const DEMO_STUDENT_ID = 'demo-student-1';
 export const DEMO_TUTOR_ID = 'demo-tutor-self';
+export const DEMO_ADMIN_ID = 'demo-admin-1';
 
 export type DemoStore = {
   profiles: any[];
@@ -88,10 +89,38 @@ export function buildDemoStore(): DemoStore {
     location_geog: null,
     school_context: 'high_school',
     onboarding_completed_at: iso(-6000),
+    is_admin: false,
     created_at: iso(-6000),
     updated_at: iso(-6000),
   });
+
+  // admin demo (accessibile da Account → "Apri pannello admin")
+  profiles.push({
+    id: DEMO_ADMIN_ID,
+    first_name: 'Admin',
+    last_name: 'StudyBuddy',
+    avatar_url: null,
+    role: 'student',
+    location_label: 'Torino, TO',
+    location_lat: 45.0703,
+    location_lng: 7.6869,
+    location_geog: null,
+    school_context: 'high_school',
+    onboarding_completed_at: iso(-9000),
+    is_admin: true,
+    created_at: iso(-9000),
+    updated_at: iso(-9000),
+  });
   const student_profiles = [
+    {
+      profile_id: DEMO_ADMIN_ID,
+      school_type: 'high_school',
+      school_name: '—',
+      university_name: '',
+      degree_course: '',
+      created_at: iso(-9000),
+      updated_at: iso(-9000),
+    },
     {
       profile_id: DEMO_STUDENT_ID,
       school_type: 'high_school',
@@ -120,6 +149,7 @@ export function buildDemoStore(): DemoStore {
     location_geog: null,
     school_context: null,
     onboarding_completed_at: iso(-5000),
+    is_admin: false,
     created_at: iso(-5000),
     updated_at: iso(-5000),
   });
@@ -169,6 +199,7 @@ export function buildDemoStore(): DemoStore {
       location_geog: null,
       school_context: null,
       onboarding_completed_at: iso(-9000 + i * 100),
+      is_admin: false,
       created_at: iso(-9000),
       updated_at: iso(-9000),
     });
@@ -262,6 +293,34 @@ export function buildDemoStore(): DemoStore {
       reviewer_note: '',
       created_at: iso(-1000),
       updated_at: iso(-1000),
+    },
+    {
+      id: 'cred3',
+      tutor_id: 'demo-tutor-2',
+      title: 'Laurea triennale in Matematica',
+      institution: 'Università di Torino',
+      year: 2023,
+      document_url: 'certificato_laurea.pdf',
+      verification_status: 'requested',
+      requested_at: iso(-2600),
+      reviewed_at: null,
+      reviewer_note: '',
+      created_at: iso(-2600),
+      updated_at: iso(-2600),
+    },
+    {
+      id: 'cred4',
+      tutor_id: 'demo-tutor-5',
+      title: 'Certificazione sviluppo software',
+      institution: 'Politecnico di Torino',
+      year: 2021,
+      document_url: null,
+      verification_status: 'requested',
+      requested_at: iso(-400),
+      reviewed_at: null,
+      reviewer_note: '',
+      created_at: iso(-400),
+      updated_at: iso(-400),
     },
   ];
 
@@ -357,6 +416,7 @@ export function buildDemoStore(): DemoStore {
     location_geog: null,
     school_context: 'high_school',
     onboarding_completed_at: iso(-4000),
+    is_admin: false,
     created_at: iso(-4000),
     updated_at: iso(-4000),
   });

@@ -22,7 +22,13 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "name": "StudyBuddy — Le ripetizioni, su misura per te",
+      "shortName": "StudyBuddy",
+      "lang": "it",
+      "description": "Trova il tutor giusto per te: lezioni private, gruppi di studio ed emergenze last-minute.",
+      "themeColor": "#6B4EFF",
+      "backgroundColor": "#FAFAFB"
     },
     "plugins": [
       "expo-router",

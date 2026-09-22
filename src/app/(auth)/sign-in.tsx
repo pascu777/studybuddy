@@ -1,4 +1,5 @@
 import { Link, useRouter } from 'expo-router';
+import Head from 'expo-router/head';
 import { Mail } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -13,7 +14,7 @@ import {
   Text,
   TextField,
 } from '@/components';
-import { APP_TAGLINE } from '@/constants/app';
+import { APP_NAME, APP_TAGLINE } from '@/constants/app';
 import { authErrorMessage, useSignIn } from '@/features/auth/hooks';
 import { useTheme } from '@/theme/theme-provider';
 import { spacing } from '@/theme/tokens';
@@ -48,7 +49,11 @@ export default function SignInScreen() {
   };
 
   return (
-    <Screen scroll footer={
+    <>
+      <Head>
+        <title>{`Accedi — ${APP_NAME}`}</title>
+      </Head>
+      <Screen scroll footer={
       <Text variant="body" tone="soft" center>
         Non hai un account?{' '}
         <Link href="/(auth)/sign-up" style={styles.linkStrong}>
@@ -119,7 +124,8 @@ export default function SignInScreen() {
       </View>
 
       <SocialButtons enabled={false} context="signin" />
-    </Screen>
+      </Screen>
+    </>
   );
 }
 

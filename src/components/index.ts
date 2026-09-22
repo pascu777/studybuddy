@@ -20,6 +20,7 @@ export { PhotoPicker } from './PhotoPicker';
 export { RatingBadge } from './RatingBadge';
 export { Screen } from './Screen';
 export { SegmentedControl, type Segment } from './SegmentedControl';
+export { Sidebar, type SidebarItem } from './Sidebar';
 export { SlotPill } from './SlotPill';
 export { SocialButtons } from './SocialButtons';
 export { StatTile } from './StatTile';

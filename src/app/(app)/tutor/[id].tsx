@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import Head from 'expo-router/head';
 import {
   BadgeCheck,
   BookOpen,
@@ -12,6 +13,7 @@ import {
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
 import { Avatar, Button, Card, Chip, EmptyState, Screen, StepHeader, Text } from '@/components';
+import { APP_NAME } from '@/constants/app';
 import { useOpenConversation } from '@/features/chat/hooks';
 import { useTutor } from '@/features/search/hooks';
 import { formatEUR } from '@/lib/money';
@@ -67,7 +69,11 @@ export default function TutorProfileScreen() {
   ].filter(keep);
 
   return (
-    <Screen
+    <>
+      <Head>
+        <title>{`${name} — ${APP_NAME}`}</title>
+      </Head>
+      <Screen
       scroll
       footer={
         tutor.accepting_students ? (
@@ -202,7 +208,8 @@ export default function TutorProfileScreen() {
           </View>
         </View>
       ) : null}
-    </Screen>
+      </Screen>
+    </>
   );
 }
 

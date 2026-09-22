@@ -1,6 +1,7 @@
 /**
  * Identità dell'app in un unico punto.
- * Il nome è provvisorio ("StudyBuddy") e può cambiare: modificare solo qui.
+ * Il nome è provvisorio ("StudyBuddy") e può cambiare: modificare solo qui
+ * e nel blocco `expo.web` di app.json (titolo/descrizione della scheda browser).
  */
 export const APP_NAME = 'StudyBuddy';
 export const APP_TAGLINE = 'Le ripetizioni, su misura per te.';

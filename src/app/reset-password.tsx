@@ -9,7 +9,8 @@ import { validatePassword } from '@/lib/validation';
 import { spacing } from '@/theme/tokens';
 
 /**
- * Raggiunta dal deep link `studybuddy://reset-password` dopo il click sull'email.
+ * Raggiunta dopo il click sul link ricevuto via email: deep link nativo
+ * `studybuddy://reset-password` su app, URL del sito su web.
  * Supabase crea una sessione di recupero: qui si imposta la nuova password.
  */
 export default function ResetPasswordScreen() {

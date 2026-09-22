@@ -18,6 +18,7 @@ npx expo start                 # dev server — 'w' web, 'a' Android, 'i' iOS, Q
 npx tsc --noEmit -p tsconfig.json   # typecheck (primary correctness gate — run after changes)
 npm run lint                   # expo lint (ESLint)
 npx expo export -p web --output-dir <dir>   # full bundle check without a device
+npm run build:web              # expo export -p web -> dist/, deploy target for vercel.json
 npx expo-doctor                # config / dependency sanity
 npx expo install <pkg>         # add deps (picks SDK-compatible versions; use instead of npm install <pkg>)
 ```
@@ -64,6 +65,14 @@ Direct table writes stay RLS-guarded (student inserts its own `bookings` as `pen
 
 ### Design system (`src/components/`, barrel `index.ts`)
 Hand-built, plain `StyleSheet` — no NativeWind / UI kit. Every component reads `useTheme()` from `src/theme/theme-provider.tsx`; all colors/spacing/type come from `src/theme/tokens.ts` (`palette`, `lightTheme`/`darkTheme`, `radius`, `spacing`, `typeScale`, `fontFamily`, `accents`). `ThemeProvider` persists a `system | light | dark` preference in AsyncStorage; `useTheme()` → palette only, `useAppTheme()` → palette + `setPreference`.
+
+### Web hardening (site-readiness on top of Expo Web)
+The app's web target (`npx expo export -p web`) is meant to double as a standalone deployable website, same backend, no separate codebase. `src/lib/platform.ts` exports `isWeb` and `useIsDesktopWeb()` (breakpoint `900px`) — the single source of truth for web/desktop branching; use it instead of ad-hoc `Platform.OS === 'web'` checks for anything layout-related. Consequences:
+- `src/features/auth/hooks.ts`'s `redirectTo()` branches on `isWeb` to build an `https://` link from `window.location.origin` instead of the native `studybuddy://` deep link, for signup confirmation and password reset. **After deploying, the deployed origin must be added to Supabase Auth → URL Configuration → Redirect URLs** (dashboard-only step, not in the repo) alongside the native `studybuddy://*` wildcard.
+- `src/lib/geo.ts` falls back to a free Nominatim (OpenStreetMap) HTTP call for `geocodeText`/reverse-geocode on web, since `expo-location`'s geocoder throws unconditionally there; the native path is untouched. No API key, no SLA — swap for a paid geocoder later if reliability becomes an issue.
+- `src/components/Screen.tsx` widens its centered column (560px → 880px) on desktop web; `src/app/(app)/_layout.tsx` swaps the bottom `<Tabs>` bar for `src/components/Sidebar.tsx` above the breakpoint (same routes, different chrome — native/mobile-web behavior is unchanged).
+- `npm run build:web` (`expo export -p web`) + `vercel.json` at the repo root deploy the static output. The static export duplicates the same JS shell at every route path (confirmed by inspecting `dist/`) — direct hits on dynamic routes (`tutor/[id]`, `chat/[id]`, `gruppi/[id]`) need `vercel.json`'s catch-all rewrite to `index.html`; don't remove it.
+- Page titles/meta come from `expo-router/head` (`import Head from 'expo-router/head'`), set client-side (not baked into the static HTML) — a default in `src/app/_layout.tsx`, overridden per-screen on `sign-in`, `home`, `cerca`, `tutor/[id]`. It's a no-op on native, no `Platform.OS` guard needed.
 
 ### Gotchas
 - **React Compiler is on** (`app.json` `experiments.reactCompiler` + `babel.config.js`). Don't mutate state/props during render; reanimated shared values and refs are fine.

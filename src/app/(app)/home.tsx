@@ -1,9 +1,11 @@
 import { useRouter } from 'expo-router';
+import Head from 'expo-router/head';
 import { CalendarClock, CalendarPlus, Inbox, Search, Siren, Sparkles, Users } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { BookingCard, Card, CategoryTile, Screen, StatTile, Text } from '@/components';
+import { APP_NAME } from '@/constants/app';
 import { useMyAvailability } from '@/features/availability/hooks';
 import { useMyBookings } from '@/features/bookings/hooks';
 import { useSubjects } from '@/features/catalog/hooks';
@@ -13,7 +15,14 @@ import { spacing } from '@/theme/tokens';
 
 export default function HomeScreen() {
   const { data: full } = useProfile();
-  return full?.profile.role === 'tutor' ? <TutorHome /> : <StudentHome />;
+  return (
+    <>
+      <Head>
+        <title>{`Home — ${APP_NAME}`}</title>
+      </Head>
+      {full?.profile.role === 'tutor' ? <TutorHome /> : <StudentHome />}
+    </>
+  );
 }
 
 function QuickLink({

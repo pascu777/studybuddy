@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import Head from 'expo-router/head';
 import { MapPin, Navigation, SlidersHorizontal } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -15,6 +16,7 @@ import {
   TextField,
   TutorCard,
 } from '@/components';
+import { APP_NAME } from '@/constants/app';
 import { useSubjects } from '@/features/catalog/hooks';
 import { levelLabel } from '@/features/catalog/levels';
 import { useProfile } from '@/features/profile/hooks';
@@ -80,7 +82,11 @@ export default function CercaScreen() {
   const subjectName = subjects.find((s) => s.id === subjectId)?.name;
 
   return (
-    <Screen scroll>
+    <>
+      <Head>
+        <title>{`Trova un tutor — ${APP_NAME}`}</title>
+      </Head>
+      <Screen scroll>
       <StepHeader
         title="Trova un tutor"
         subtitle={
@@ -279,7 +285,8 @@ export default function CercaScreen() {
           ))}
         </View>
       )}
-    </Screen>
+      </Screen>
+    </>
   );
 }
 

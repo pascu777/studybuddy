@@ -1,10 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { APP_SCHEME } from '@/constants/app';
+import { isWeb } from '@/lib/platform';
 import { supabase } from '@/lib/supabase';
 
 function redirectTo(path: string) {
-  // Deep link nativo; su web Supabase usa l'origin corrente.
+  if (isWeb && typeof window !== 'undefined') {
+    return `${window.location.origin}/${path}`;
+  }
   return `${APP_SCHEME}://${path}`;
 }
 

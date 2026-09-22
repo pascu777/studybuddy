@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Edge, SafeAreaView } from 'react-native-safe-area-context';
 
+import { useIsDesktopWeb } from '@/lib/platform';
 import { useTheme } from '@/theme/theme-provider';
 import { spacing } from '@/theme/tokens';
 
@@ -23,6 +24,7 @@ type ScreenProps = {
 };
 
 const MAX_WIDTH = 560;
+const DESKTOP_MAX_WIDTH = 880;
 
 export function Screen({
   children,
@@ -34,10 +36,14 @@ export function Screen({
   backgroundColor,
 }: ScreenProps) {
   const theme = useTheme();
+  const isDesktop = useIsDesktopWeb();
   const bg = backgroundColor ?? theme.bg;
+  const maxWidth = isDesktop ? DESKTOP_MAX_WIDTH : MAX_WIDTH;
 
   const inner = (
-    <View style={[styles.inner, padded && styles.padded, contentStyle]}>{children}</View>
+    <View style={[styles.inner, { maxWidth }, padded && styles.padded, contentStyle]}>
+      {children}
+    </View>
   );
 
   return (
@@ -60,7 +66,7 @@ export function Screen({
         )}
         {footer ? (
           <View style={[styles.footer, padded && styles.footerPadded]}>
-            <View style={styles.footerInner}>{footer}</View>
+            <View style={[styles.footerInner, { maxWidth }]}>{footer}</View>
           </View>
         ) : null}
       </KeyboardAvoidingView>

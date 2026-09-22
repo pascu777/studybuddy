@@ -1,0 +1,48 @@
+STUDYBUDDY — ISTRUZIONI E PREFERENZE DI LAVORO
+================================================
+
+
+1. ISTRUZIONI DI PROGETTO (da CLAUDE.md)
+-----------------------------------------
+
+Identita' del progetto:
+- StudyBuddy (nome provvisorio) - marketplace di ripetizioni, Expo (React Native) + Supabase, una codebase per iOS/Android/Web.
+- Copy e comunicazione utente sempre in italiano.
+- Fasi 1-8, 10-12 costruite; F9 (social/phone login) e PSP reale per i payout sono roadmap.
+
+Comandi da usare:
+- npx tsc --noEmit -p tsconfig.json  -> gate di correttezza principale, va eseguito dopo ogni modifica.
+- npx expo install <pkg> invece di npm install <pkg> per le dipendenze (sceglie versioni compatibili con l'SDK).
+- Nessun test runner configurato.
+
+Regole architetturali vincolanti:
+1. Letture cross-utente solo via RPC SECURITY DEFINER, mai select diretta su tabella - RLS e' sempre "solo la propria riga". Ogni nuova vista cross-utente richiede: una RPC nelle migrazioni + un case corrispondente in src/lib/demo/rpc.ts (altrimenti la demo restituisce []).
+2. Il client Supabase e' volutamente non tipizzato (createClient() senza generic <Database>) - non "correggerlo" aggiungendo il tipo, e' una scelta deliberata perche' rompeva l'inferenza.
+3. Ogni nuovo hook deve restare nella superficie supportata dalla demo: .from().select/insert/update/upsert/delete().eq/neq/in/gte/lte/is/order/limit().maybeSingle/single() + .rpc().
+4. React Compiler attivo - mai mutare stato/props durante il render.
+5. Il routing e' un "redirect gate": ogni _layout.tsx di gruppo deve ricontrollare le stesse condizioni di sessione/profilo.
+6. Le route tipizzate si rigenerano solo con expo start, non con expo export - dopo aver aggiunto una schermata, tsc segnalera' errori finche' non gira expo start una volta.
+7. lucide-react-native v1.43 non ha icone brand (Instagram, Google, ecc.).
+8. Le migrazioni vanno applicate in ordine stretto (0003 deve droppare get_tutor prima di ridefinirla).
+9. profiles.is_admin e la verifica credenziali sono modificabili solo da service-role/admin, mai dal client.
+10. Il trigger on_booking_paid_confirmed puo' sollevare un'eccezione (soglia 5000 euro senza partita IVA) - chi la chiama deve gestire/mostrare l'errore.
+
+Git:
+- Repo locale, branch master, nessun remote configurato - push su GitHub ancora da fare (manca gh CLI).
+- Identita' git impostata a livello di repo.
+
+
+2. PREFERENZE DI LAVORO (osservate nelle sessioni precedenti)
+-----------------------------------------------------------------
+
+- Vuoi passate complete, non consegne parziali: quando chiedi qualcosa, la aspetti implementata per intero in un solo turno (schema + hook + schermate + verifica), non a step con conferme intermedie.
+- Vuoi vedere i risultati: anteprime navigabili (Artifact), screenshot reali dell'app in esecuzione - non solo descrizioni testuali.
+- I requisiti arrivano in modo incrementale: aggiungi vincoli man mano che ci pensi ("aggiungi...", "inoltre...") - vanno integrati nel lavoro in corso.
+- Verifica prima di dichiarare fatto: tsc pulito + build web che passa + una demo cliccabile davvero.
+- Commit/push solo se richiesto esplicitamente ("committa tutto", "fai push") - mai in autonomia.
+
+
+3. CHI SEI (contesto)
+----------------------
+
+Leonardo Pascucci, founder solista, comunichi in italiano, lavori su Windows (PowerShell/Git Bash, no Docker, no gh CLI). Dai la visione di prodotto in prosa e ti affidi all'assistente per implementazione e tooling completi (git init, setup GitHub, avvio app, ecc.).

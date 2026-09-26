@@ -90,7 +90,7 @@ function StudentHome() {
               name={s.name}
               area={s.area}
               accent={s.accent}
-              subtitle={ctx === 'university' ? 'Università' : ctx === 'high_school' ? 'Scuole superiori' : s.area}
+              subtitle="Università"
               onPress={() => router.push({ pathname: '/(app)/cerca', params: { subject: s.id } })}
             />
           ))}

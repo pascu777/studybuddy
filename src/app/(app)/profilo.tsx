@@ -8,7 +8,6 @@ import {
   Card,
   NumberStepper,
   Screen,
-  SegmentedControl,
   StepHeader,
   Text,
   TextField,
@@ -74,20 +73,14 @@ export default function ProfiloScreen() {
   const [locating, setLocating] = useState(false);
 
   // --- stato tutor ------------------------------------------------------
-  const [highSchool, setHighSchool] = useState(false);
-  const [university, setUniversity] = useState(false);
   const [inPerson, setInPerson] = useState(true);
   const [online, setOnline] = useState(true);
   const [tUniversityName, setTUniversityName] = useState('');
   const [tDegreeCourse, setTDegreeCourse] = useState('');
-  const [hsSubjects, setHsSubjects] = useState<string[]>([]);
   const [uniSubjects, setUniSubjects] = useState<string[]>([]);
-  const [hsRange, setHsRange] = useState<[number, number]>([1, 5]);
   const [uniRange, setUniRange] = useState<[number, number]>([1, 5]);
 
   // --- stato studente -------------------------------------------------
-  const [schoolType, setSchoolType] = useState<SchoolContext>('high_school');
-  const [schoolName, setSchoolName] = useState('');
   const [sUniversityName, setSUniversityName] = useState('');
   const [sDegreeCourse, setSDegreeCourse] = useState('');
   const [studentSubjectIds, setStudentSubjectIds] = useState<string[]>([]);
@@ -111,31 +104,19 @@ export default function ProfiloScreen() {
       setPhotoIsRemote(true);
     }
     if (full.tutorProfile) {
-      setHighSchool(full.tutorProfile.teaches_high_school);
-      setUniversity(full.tutorProfile.teaches_university);
       setInPerson(full.tutorProfile.delivery_in_person);
       setOnline(full.tutorProfile.delivery_online);
       setTUniversityName(full.tutorProfile.university_name);
       setTDegreeCourse(full.tutorProfile.degree_course);
     }
     if (full.studentProfile) {
-      setSchoolType(full.studentProfile.school_type);
-      setSchoolName(full.studentProfile.school_name);
       setSUniversityName(full.studentProfile.university_name);
       setSDegreeCourse(full.studentProfile.degree_course);
     }
   }, [full]);
 
   useEffect(() => {
-    const hs = tutorSubjects.filter((s) => s.school_context === 'high_school');
     const uni = tutorSubjects.filter((s) => s.school_context === 'university');
-    if (hs.length) {
-      setHsSubjects(hs.map((s) => s.subject_id));
-      setHsRange([
-        Math.min(...hs.map((s) => s.level_from)),
-        Math.max(...hs.map((s) => s.level_to)),
-      ]);
-    }
     if (uni.length) {
       setUniSubjects(uni.map((s) => s.subject_id));
       setUniRange([
@@ -206,49 +187,39 @@ export default function ProfiloScreen() {
         avatar_url: avatarUrl,
         location_label: locationLabel.trim(),
         coords,
-        ...(role === 'student' ? { school_context: schoolType } : null),
+        ...(role === 'student' ? { school_context: 'university' as const } : null),
       });
 
       if (role === 'tutor') {
         await upsertTutor.mutateAsync({
-          teaches_high_school: highSchool,
-          teaches_university: university,
+          teaches_high_school: false,
+          teaches_university: true,
           delivery_in_person: inPerson,
           delivery_online: online,
           university_name: tUniversityName.trim(),
           degree_course: tDegreeCourse.trim(),
         });
-        await saveTutorSubjects.mutateAsync([
-          ...(highSchool
-            ? hsSubjects.map((id) => ({
-                subjectId: id,
-                schoolContext: 'high_school' as const,
-                levelFrom: hsRange[0],
-                levelTo: hsRange[1],
-              }))
-            : []),
-          ...(university
-            ? uniSubjects.map((id) => ({
-                subjectId: id,
-                schoolContext: 'university' as const,
-                levelFrom: uniRange[0],
-                levelTo: uniRange[1],
-              }))
-            : []),
-        ]);
+        await saveTutorSubjects.mutateAsync(
+          uniSubjects.map((id) => ({
+            subjectId: id,
+            schoolContext: 'university' as const,
+            levelFrom: uniRange[0],
+            levelTo: uniRange[1],
+          })),
+        );
       }
 
       if (role === 'student') {
         await upsertStudent.mutateAsync({
-          school_type: schoolType,
-          school_name: schoolName.trim(),
-          university_name: schoolType === 'university' ? sUniversityName.trim() : '',
-          degree_course: schoolType === 'university' ? sDegreeCourse.trim() : '',
+          school_type: 'university',
+          school_name: '',
+          university_name: sUniversityName.trim(),
+          degree_course: sDegreeCourse.trim(),
         });
         await saveStudentSubjects.mutateAsync(
           studentSubjectIds.map((id) => ({
             subjectId: id,
-            schoolContext: schoolType,
+            schoolContext: 'university' as const,
             level: studentLevel,
           })),
         );
@@ -346,40 +317,23 @@ export default function ProfiloScreen() {
       {role === 'tutor' ? (
         <>
           <Section title="Insegnamento">
-            <ToggleRow label="Scuole superiori" value={highSchool} onValueChange={setHighSchool} />
-            <ToggleRow label="Università" value={university} onValueChange={setUniversity} />
             <ToggleRow label="In presenza" value={inPerson} onValueChange={setInPerson} />
             <ToggleRow label="Online" value={online} onValueChange={setOnline} />
           </Section>
 
-          {university ? (
-            <Section title="Università">
-              <TextField label="Ateneo" value={tUniversityName} onChangeText={setTUniversityName} />
-              <TextField label="Corso di laurea" value={tDegreeCourse} onChangeText={setTDegreeCourse} />
-            </Section>
-          ) : null}
+          <Section title="Università">
+            <TextField label="Ateneo" value={tUniversityName} onChangeText={setTUniversityName} />
+            <TextField label="Corso di laurea" value={tDegreeCourse} onChangeText={setTDegreeCourse} />
+          </Section>
 
-          {highSchool ? (
-            <Section title="Materie · Superiori">
-              {rangeCard('high_school', hsRange, setHsRange)}
-              <SubjectPicker
-                ctx="high_school"
-                selected={hsSubjects}
-                onToggle={(id) => toggleIn(hsSubjects, setHsSubjects, id)}
-              />
-            </Section>
-          ) : null}
-
-          {university ? (
-            <Section title="Materie · Università">
-              {rangeCard('university', uniRange, setUniRange)}
-              <SubjectPicker
-                ctx="university"
-                selected={uniSubjects}
-                onToggle={(id) => toggleIn(uniSubjects, setUniSubjects, id)}
-              />
-            </Section>
-          ) : null}
+          <Section title="Materie">
+            {rangeCard('university', uniRange, setUniRange)}
+            <SubjectPicker
+              ctx="university"
+              selected={uniSubjects}
+              onToggle={(id) => toggleIn(uniSubjects, setUniSubjects, id)}
+            />
+          </Section>
 
           <Section title="Titoli di studio">
             {credentials.map((c) => (
@@ -467,31 +421,13 @@ export default function ProfiloScreen() {
       {role === 'student' ? (
         <>
           <Section title="Studi">
-            <SegmentedControl<SchoolContext>
-              value={schoolType}
-              onChange={(v) => {
-                setSchoolType(v);
-                setStudentSubjectIds([]);
-                setStudentLevel(1);
-              }}
-              segments={[
-                { value: 'high_school', label: 'Superiori' },
-                { value: 'university', label: 'Università' },
-              ]}
+            <TextField label="Ateneo" value={sUniversityName} onChangeText={setSUniversityName} />
+            <TextField
+              label="Corso di laurea"
+              value={sDegreeCourse}
+              onChangeText={setSDegreeCourse}
+              hint="Presto: ricerca tutor per singolo esame e docente."
             />
-            {schoolType === 'high_school' ? (
-              <TextField label="Scuola" value={schoolName} onChangeText={setSchoolName} />
-            ) : (
-              <>
-                <TextField label="Ateneo" value={sUniversityName} onChangeText={setSUniversityName} />
-                <TextField
-                  label="Corso di laurea"
-                  value={sDegreeCourse}
-                  onChangeText={setSDegreeCourse}
-                  hint="Presto: ricerca tutor per singolo esame e docente."
-                />
-              </>
-            )}
             <Card padding="md" style={styles.rangeCard}>
               <Text variant="label" tone="soft">
                 IL TUO ANNO
@@ -501,14 +437,14 @@ export default function ProfiloScreen() {
                 min={1}
                 max={5}
                 onChange={setStudentLevel}
-                format={(v) => levelLabel(schoolType, v)}
+                format={(v) => levelLabel('university', v)}
               />
             </Card>
           </Section>
 
           <Section title="Materie da studiare">
             <SubjectPicker
-              ctx={schoolType}
+              ctx="university"
               selected={studentSubjectIds}
               onToggle={(id) => toggleIn(studentSubjectIds, setStudentSubjectIds, id)}
             />

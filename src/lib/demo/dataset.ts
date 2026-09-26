@@ -62,10 +62,10 @@ const SUBJECTS = [
 ];
 
 const tutorNames: [string, string, string, string, boolean, string][] = [
-  ['demo-tutor-1', 'Alessandro', 'Rossi', 'Torino, TO', true, 'Ingegnere, 6 anni di ripetizioni tra superiori e università. Lezioni pratiche, molti esercizi.'],
+  ['demo-tutor-1', 'Alessandro', 'Rossi', 'Torino, TO', true, 'Ingegnere, 6 anni di ripetizioni universitarie. Lezioni pratiche, molti esercizi.'],
   ['demo-tutor-2', 'Chiara', 'Serra', 'Torino, TO', false, 'Laureanda in Matematica, disponibile anche nei weekend.'],
-  ['demo-tutor-3', 'Marco', 'Bianchi', 'Moncalieri, TO', true, 'Dottorando in Fisica. Preparo esami universitari e maturità scientifica.'],
-  ['demo-tutor-4', 'Giulia', 'De Luca', 'Torino, TO', true, 'Insegnante di lettere. Latino, italiano e storia per il liceo.'],
+  ['demo-tutor-3', 'Marco', 'Bianchi', 'Moncalieri, TO', true, 'Dottorando in Fisica. Preparo esami universitari di analisi e fisica.'],
+  ['demo-tutor-4', 'Giulia', 'De Luca', 'Torino, TO', true, 'Laureata in Lettere. Latino, italiano e storia per l\'università.'],
   ['demo-tutor-5', 'Paolo', 'Greco', 'Rivoli, TO', false, 'Sviluppatore software. Informatica e programmazione, anche solo online.'],
 ];
 
@@ -87,7 +87,7 @@ export function buildDemoStore(): DemoStore {
     location_lat: 45.0703,
     location_lng: 7.6869,
     location_geog: null,
-    school_context: 'high_school',
+    school_context: 'university',
     onboarding_completed_at: iso(-6000),
     is_admin: false,
     created_at: iso(-6000),
@@ -105,7 +105,7 @@ export function buildDemoStore(): DemoStore {
     location_lat: 45.0703,
     location_lng: 7.6869,
     location_geog: null,
-    school_context: 'high_school',
+    school_context: 'university',
     onboarding_completed_at: iso(-9000),
     is_admin: true,
     created_at: iso(-9000),
@@ -114,8 +114,8 @@ export function buildDemoStore(): DemoStore {
   const student_profiles = [
     {
       profile_id: DEMO_ADMIN_ID,
-      school_type: 'high_school',
-      school_name: '—',
+      school_type: 'university',
+      school_name: '',
       university_name: '',
       degree_course: '',
       created_at: iso(-9000),
@@ -123,17 +123,17 @@ export function buildDemoStore(): DemoStore {
     },
     {
       profile_id: DEMO_STUDENT_ID,
-      school_type: 'high_school',
-      school_name: 'Liceo Scientifico Galilei',
-      university_name: '',
-      degree_course: '',
+      school_type: 'university',
+      school_name: '',
+      university_name: 'Università di Torino',
+      degree_course: 'Matematica',
       created_at: iso(-6000),
       updated_at: iso(-6000),
     },
   ];
   const student_subjects = [
-    { id: 'ss1', student_id: DEMO_STUDENT_ID, subject_id: 'matematica', school_context: 'high_school', level: 3, created_at: iso(-6000) },
-    { id: 'ss2', student_id: DEMO_STUDENT_ID, subject_id: 'fisica', school_context: 'high_school', level: 3, created_at: iso(-6000) },
+    { id: 'ss1', student_id: DEMO_STUDENT_ID, subject_id: 'matematica', school_context: 'university', level: 3, created_at: iso(-6000) },
+    { id: 'ss2', student_id: DEMO_STUDENT_ID, subject_id: 'fisica', school_context: 'university', level: 3, created_at: iso(-6000) },
   ];
 
   // "me" come tutor (per passare al ruolo tutor in demo) — non elencato nella ricerca
@@ -158,8 +158,8 @@ export function buildDemoStore(): DemoStore {
     bio: 'Profilo tutor di prova.',
     university_name: 'Università di Torino',
     degree_course: 'Matematica',
-    teaches_high_school: true,
-    teaches_university: false,
+    teaches_high_school: false,
+    teaches_university: true,
     delivery_in_person: true,
     delivery_online: true,
     verified: false,
@@ -208,8 +208,8 @@ export function buildDemoStore(): DemoStore {
       bio,
       university_name: i % 2 ? 'Politecnico di Torino' : 'Università di Torino',
       degree_course: ['Ingegneria Informatica', 'Matematica', 'Fisica', 'Lettere', 'Informatica'][i],
-      teaches_high_school: true,
-      teaches_university: i % 2 === 0,
+      teaches_high_school: false,
+      teaches_university: true,
       delivery_in_person: id !== 'demo-tutor-5',
       delivery_online: true,
       verified,
@@ -230,25 +230,14 @@ export function buildDemoStore(): DemoStore {
     ][i];
     subs.forEach((sid, k) => {
       tutor_subjects.push({
-        id: `${id}-ts${k}`,
+        id: `${id}-tsu${k}`,
         tutor_id: id,
         subject_id: sid,
-        school_context: 'high_school',
+        school_context: 'university',
         level_from: 1,
         level_to: 5,
         created_at: iso(-9000),
       });
-      if (i % 2 === 0) {
-        tutor_subjects.push({
-          id: `${id}-tsu${k}`,
-          tutor_id: id,
-          subject_id: sid,
-          school_context: 'university',
-          level_from: 1,
-          level_to: 3,
-          created_at: iso(-9000),
-        });
-      }
     });
 
     // 3 slot per tutor su giorni diversi
@@ -414,7 +403,7 @@ export function buildDemoStore(): DemoStore {
     location_lat: 45.07,
     location_lng: 7.69,
     location_geog: null,
-    school_context: 'high_school',
+    school_context: 'university',
     onboarding_completed_at: iso(-4000),
     is_admin: false,
     created_at: iso(-4000),

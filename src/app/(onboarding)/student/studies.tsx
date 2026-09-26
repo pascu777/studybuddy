@@ -2,17 +2,7 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 
-import {
-  Button,
-  Card,
-  Chip,
-  NumberStepper,
-  Screen,
-  SegmentedControl,
-  StepHeader,
-  Text,
-  TextField,
-} from '@/components';
+import { Button, Card, Chip, NumberStepper, Screen, StepHeader, Text, TextField } from '@/components';
 import { SubjectPicker } from '@/features/catalog/SubjectPicker';
 import { levelLabel } from '@/features/catalog/levels';
 import { useDegreeCourses } from '@/features/university/hooks';
@@ -24,7 +14,6 @@ import {
   type StudentSubjectInput,
 } from '@/features/profile/hooks';
 import { spacing } from '@/theme/tokens';
-import type { SchoolContext } from '@/types/database';
 
 export default function StudentStudiesStep() {
   const router = useRouter();
@@ -33,8 +22,6 @@ export default function StudentStudiesStep() {
   const updateProfile = useUpdateProfile();
 
   const { data: degreeCourses = [] } = useDegreeCourses();
-  const [schoolType, setSchoolType] = useState<SchoolContext>('high_school');
-  const [schoolName, setSchoolName] = useState('');
   const [universityName, setUniversityName] = useState('');
   const [degreeCourse, setDegreeCourse] = useState('');
   const [degreeCourseId, setDegreeCourseId] = useState<string | null>(null);
@@ -44,37 +31,32 @@ export default function StudentStudiesStep() {
 
   const canProceed = useMemo(() => {
     if (subjects.length === 0) return false;
-    if (schoolType === 'university' && !degreeCourse.trim()) return false;
+    if (!degreeCourse.trim()) return false;
     return true;
-  }, [subjects, schoolType, degreeCourse]);
+  }, [subjects, degreeCourse]);
 
   const toggle = (id: string) =>
     setSubjects((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
 
   const submit = async () => {
     if (!canProceed) {
-      Alert.alert(
-        'Completa i campi',
-        schoolType === 'university'
-          ? 'Indica il corso di laurea e almeno una materia.'
-          : 'Seleziona almeno una materia.',
-      );
+      Alert.alert('Completa i campi', 'Indica il corso di laurea e almeno una materia.');
       return;
     }
     setSaving(true);
     try {
       await upsertStudent.mutateAsync({
-        school_type: schoolType,
-        school_name: schoolName.trim(),
-        university_name: schoolType === 'university' ? universityName.trim() : '',
-        degree_course: schoolType === 'university' ? degreeCourse.trim() : '',
-        degree_course_id: schoolType === 'university' ? degreeCourseId : null,
+        school_type: 'university',
+        school_name: '',
+        university_name: universityName.trim(),
+        degree_course: degreeCourse.trim(),
+        degree_course_id: degreeCourseId,
       });
-      await updateProfile.mutateAsync({ school_context: schoolType });
+      await updateProfile.mutateAsync({ school_context: 'university' });
 
       const items: StudentSubjectInput[] = subjects.map((id) => ({
         subjectId: id,
-        schoolContext: schoolType,
+        schoolContext: 'university',
         level,
       }));
       await saveSubjects.mutateAsync(items);
@@ -93,69 +75,45 @@ export default function StudentStudiesStep() {
     >
       <StepHeader
         title="I tuoi studi"
-        subtitle="Così ti proponiamo tutor e materiali adatti al tuo livello."
+        subtitle="Così ti proponiamo tutor e materiali adatti al tuo corso e al tuo anno."
         step={2}
         total={stepCount('student')}
         onBack={() => router.back()}
       />
 
-      <SegmentedControl<SchoolContext>
-        value={schoolType}
-        onChange={(v) => {
-          setSchoolType(v);
-          setSubjects([]);
-          setLevel(1);
-        }}
-        segments={[
-          { value: 'high_school', label: 'Superiori' },
-          { value: 'university', label: 'Università' },
-        ]}
-      />
-
       <View style={styles.form}>
-        {schoolType === 'high_school' ? (
-          <TextField
-            label="Scuola (facoltativo)"
-            placeholder="Es. Liceo Scientifico Galilei"
-            value={schoolName}
-            onChangeText={setSchoolName}
-          />
-        ) : (
-          <>
-            <View style={styles.block}>
-              <Text variant="label" tone="soft">
-                CORSO DI LAUREA
-              </Text>
-              {degreeCourses.length ? (
-                <View style={styles.dcList}>
-                  {degreeCourses.map((dc) => (
-                    <Chip
-                      key={dc.id}
-                      label={`${dc.name} · ${dc.university_name}`}
-                      selected={dc.id === degreeCourseId}
-                      onPress={() => {
-                        const sel = dc.id === degreeCourseId;
-                        setDegreeCourseId(sel ? null : dc.id);
-                        setDegreeCourse(sel ? '' : dc.name);
-                        setUniversityName(sel ? '' : dc.university_name);
-                      }}
-                    />
-                  ))}
-                </View>
-              ) : null}
-              <TextField
-                label="Non è in elenco? Scrivilo"
-                placeholder="Es. Ingegneria Informatica"
-                value={degreeCourse}
-                onChangeText={(v) => {
-                  setDegreeCourse(v);
-                  setDegreeCourseId(null);
-                }}
-                hint="Con il corso in elenco potrai cercare tutor per singolo esame e docente."
-              />
+        <View style={styles.block}>
+          <Text variant="label" tone="soft">
+            CORSO DI LAUREA
+          </Text>
+          {degreeCourses.length ? (
+            <View style={styles.dcList}>
+              {degreeCourses.map((dc) => (
+                <Chip
+                  key={dc.id}
+                  label={`${dc.name} · ${dc.university_name}`}
+                  selected={dc.id === degreeCourseId}
+                  onPress={() => {
+                    const sel = dc.id === degreeCourseId;
+                    setDegreeCourseId(sel ? null : dc.id);
+                    setDegreeCourse(sel ? '' : dc.name);
+                    setUniversityName(sel ? '' : dc.university_name);
+                  }}
+                />
+              ))}
             </View>
-          </>
-        )}
+          ) : null}
+          <TextField
+            label="Non è in elenco? Scrivilo"
+            placeholder="Es. Ingegneria Informatica"
+            value={degreeCourse}
+            onChangeText={(v) => {
+              setDegreeCourse(v);
+              setDegreeCourseId(null);
+            }}
+            hint="Con il corso in elenco potrai cercare tutor per singolo esame e docente."
+          />
+        </View>
 
         <Card padding="md" style={styles.levelCard}>
           <Text variant="label" tone="soft">
@@ -166,14 +124,14 @@ export default function StudentStudiesStep() {
             min={1}
             max={5}
             onChange={setLevel}
-            format={(v) => levelLabel(schoolType, v)}
+            format={(v) => levelLabel('university', v)}
           />
         </Card>
 
         <Text variant="heading" style={styles.section}>
           Materie da studiare
         </Text>
-        <SubjectPicker ctx={schoolType} selected={subjects} onToggle={toggle} />
+        <SubjectPicker ctx="university" selected={subjects} onToggle={toggle} />
       </View>
     </Screen>
   );

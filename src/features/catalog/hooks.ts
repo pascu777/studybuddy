@@ -12,9 +12,6 @@ export function useSubjects(ctx?: SchoolContext) {
       if (error) throw error;
       return data ?? [];
     },
-    select: (rows) =>
-      ctx
-        ? rows.filter((s) => (ctx === 'high_school' ? s.applies_high_school : s.applies_university))
-        : rows,
+    select: (rows) => (ctx ? rows.filter((s) => s.applies_university) : rows),
   });
 }

@@ -2,11 +2,8 @@ import type { SchoolContext } from '@/types/database';
 
 export type LevelOption = { value: number; label: string };
 
-/** Livelli selezionabili in base al tipo di scuola. */
-export function levelOptions(ctx: SchoolContext): LevelOption[] {
-  if (ctx === 'high_school') {
-    return [1, 2, 3, 4, 5].map((n) => ({ value: n, label: `${n}ª superiore` }));
-  }
+/** Livelli selezionabili — StudyBuddy è un'app solo per l'università. */
+export function levelOptions(_ctx?: SchoolContext): LevelOption[] {
   return [
     { value: 1, label: '1º anno' },
     { value: 2, label: '2º anno' },
@@ -16,11 +13,11 @@ export function levelOptions(ctx: SchoolContext): LevelOption[] {
   ];
 }
 
-export function levelLabel(ctx: SchoolContext, value: number): string {
+export function levelLabel(ctx: SchoolContext | undefined, value: number): string {
   return levelOptions(ctx).find((o) => o.value === value)?.label ?? `Livello ${value}`;
 }
 
-export function levelRangeLabel(ctx: SchoolContext, from: number, to: number): string {
+export function levelRangeLabel(ctx: SchoolContext | undefined, from: number, to: number): string {
   if (from >= to) return levelLabel(ctx, from);
   return `${levelLabel(ctx, from)} – ${levelLabel(ctx, to)}`;
 }

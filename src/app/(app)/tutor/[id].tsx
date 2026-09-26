@@ -59,10 +59,6 @@ export default function TutorProfileScreen() {
 
   const name = `${tutor.first_name} ${tutor.last_name}`.trim();
   const keep = (x: unknown): x is string => typeof x === 'string';
-  const ambiti = [
-    tutor.teaches_high_school && 'Superiori',
-    tutor.teaches_university && 'Università',
-  ].filter(keep);
   const modalita = [
     tutor.delivery_in_person && 'In presenza',
     tutor.delivery_online && 'Online',
@@ -162,9 +158,6 @@ export default function TutorProfileScreen() {
       <View style={styles.section}>
         <Text variant="heading" style={styles.h}>
           Insegna
-        </Text>
-        <Text variant="caption" tone="soft" style={{ marginBottom: spacing.sm }}>
-          {ambiti.join(' e ') || 'Ripetizioni'}
         </Text>
         <View style={styles.chips}>
           {(tutor.subjects ?? []).map((s) => (
